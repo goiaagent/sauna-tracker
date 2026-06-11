@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sauna Tracker - Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+</head>
+<body>
+
+  <div class="container">
+    <h1 class="page-title">Dashboard</h1>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="statStreak">0</div>
+        <div class="stat-label">Day Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statTotalSessions">0</div>
+        <div class="stat-label">Total Sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statTotalHours">0</div>
+        <div class="stat-label">Total Hours</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statAvgSession">—</div>
+        <div class="stat-label">Avg Session</div>
+      </div>
+      <div class="stat-card full">
+        <div class="stat-value" id="statLongestSession">—</div>
+        <div class="stat-label">Longest Session</div>
+      </div>
+    </div>
+
+    <!-- Weekly Chart -->
+    <div class="chart-section">
+      <div class="chart-title">Last 7 Days (minutes)</div>
+      <div class="chart-container">
+        <canvas id="weekChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Monthly Trend -->
+    <div class="chart-section">
+      <div class="chart-title">Monthly Trend (total minutes)</div>
+      <div class="chart-container">
+        <canvas id="monthChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-icon">⏱</span>
+      <span>Timer</span>
+    </a>
+    <a href="log.html" class="nav-item">
+      <span class="nav-icon">📋</span>
+      <span>Log</span>
+    </a>
+    <a href="dashboard.html" class="nav-item active">
+      <span class="nav-icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+  </nav>
+
+  <script src="js/data.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/log.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

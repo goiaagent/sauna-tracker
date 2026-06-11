@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sauna Tracker - Log</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1 class="page-title">Session Log</h1>
+
+    <!-- Filters -->
+    <div class="log-controls">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search notes or temperature..." />
+      <select class="month-filter" id="monthFilter">
+        <option value="">All months</option>
+      </select>
+    </div>
+
+    <!-- Log List -->
+    <div class="log-list" id="logList"></div>
+
+    <!-- Empty State -->
+    <div class="log-empty" id="logEmpty" style="display:none;">
+      <div class="log-empty-icon">🏝️</div>
+      <p>No sessions found.</p>
+      <p style="font-size:0.8rem;margin-top:4px;color:var(--text-muted);">Start your first session on the Timer page!</p>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-icon">⏱</span>
+      <span>Timer</span>
+    </a>
+    <a href="log.html" class="nav-item active">
+      <span class="nav-icon">📋</span>
+      <span>Log</span>
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+  </nav>
+
+  <script src="js/data.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/log.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

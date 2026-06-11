@@ -47,10 +47,9 @@ window.SaunaData = {
   getAllSessions() {
     const sessions = loadSessions();
     sessions.sort((a, b) => {
-      // Sort by date (desc), then by id (desc) as tiebreaker
       const cmp = b.date.localeCompare(a.date);
       if (cmp !== 0) return cmp;
-      return b.id.localeCompare(a.id);
+      return (b.id || '').localeCompare(a.id || '');
     });
     return sessions;
   },
@@ -61,15 +60,19 @@ window.SaunaData = {
     return sessions.find(s => s.id === id) || null;
   },
 
-  /** Add a new session. Fields: {date, duration_seconds, temperature, notes}.
+  /** Add a new session.
+   *  Fields: { date, time, rounds, total_minutes, temperature, contrast, notes }
    *  date format: 'YYYY-MM-DD'. Returns the created session. */
-  addSession({ date, duration_seconds, temperature, notes }) {
+  addSession({ date, time, rounds, total_minutes, temperature, contrast, notes }) {
     const sessions = loadSessions();
     const session = {
       id: generateId(),
       date: date || todayStr(),
-      duration_seconds: Number(duration_seconds) || 0,
-      temperature: temperature != null ? Number(temperature) : null,
+      time: time || '',
+      rounds: Number(rounds) || 1,
+      total_minutes: Number(total_minutes) || 0,
+      temperature: temperature || '',
+      contrast: !!contrast,
       notes: notes || '',
       createdAt: new Date().toISOString()
     };
@@ -112,11 +115,11 @@ window.SaunaData = {
       };
     }
 
-    const totalSeconds = sessions.reduce((sum, s) => sum + (s.duration_seconds || 0), 0);
-    const totalMinutes = Math.round(totalSeconds / 60);
-    const totalHours = Math.floor(totalMinutes / 60);
-    const avgDuration = Math.round(totalSeconds / count);
-    const longestSession = sessions.reduce((max, s) => Math.max(max, s.duration_seconds || 0), 0);
+    const totalMinutesAll = sessions.reduce((sum, s) => sum + (s.total_minutes || 0), 0);
+    const totalHours = Math.floor(totalMinutesAll / 60);
+    const totalMinutes = totalMinutesAll % 60;
+    const avgDuration = Math.round(totalMinutesAll / count);
+    const longestSession = sessions.reduce((max, s) => Math.max(max, s.total_minutes || 0), 0);
     const streak = this.calculateStreak(sessions);
 
     return {
@@ -129,14 +132,12 @@ window.SaunaData = {
     };
   },
 
-  /** Return an array of the last 7 days with total minutes per day.
-   *  Format: [{date: 'YYYY-MM-DD', total_minutes: number}, ...] */
+  /** Return an array of the last 7 days with total minutes per day. */
   getWeeklyData() {
     return this._getDateRangeData(7);
   },
 
-  /** Return an array of the last 30 days with total minutes per day.
-   *  Format: [{date: 'YYYY-MM-DD', total_minutes: number}, ...] */
+  /** Return an array of the last 30 days with total minutes per day. */
   getMonthlyData() {
     return this._getDateRangeData(30);
   },
@@ -146,10 +147,9 @@ window.SaunaData = {
     const sessions = loadSessions();
     const map = {};
 
-    // Aggregate seconds per date
     sessions.forEach(s => {
       const d = dateStr(s.date);
-      map[d] = (map[d] || 0) + (s.duration_seconds || 0);
+      map[d] = (map[d] || 0) + (s.total_minutes || 0);
     });
 
     const result = [];
@@ -158,29 +158,25 @@ window.SaunaData = {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
       const key = d.toISOString().slice(0, 10);
-      const totalSec = map[key] || 0;
       result.push({
         date: key,
-        total_minutes: Math.round(totalSec / 60)
+        total_minutes: map[key] || 0
       });
     }
     return result;
   },
 
   /** Count the current streak of consecutive days with at least one session.
-   *  Gaps of 1-2 days are ignored (i.e., a gap of 1 or 2 days does NOT break
-   *  the streak). This accommodates real-life sauna routines where you might
-   *  skip a day or two. */
+   *  Gaps of 1-2 days are ignored. */
   calculateStreak(sessions) {
     if (!sessions || sessions.length === 0) return 0;
 
-    // Get unique, sorted dates (descending)
     const dateSet = new Set(sessions.map(s => dateStr(s.date)));
     const dates = Array.from(dateSet).sort().reverse();
     if (dates.length === 0) return 0;
 
     let streak = 1;
-    let skipped = 0; // accumulated skip days in current gap
+    let skipped = 0;
 
     for (let i = 0; i < dates.length - 1; i++) {
       const cur = new Date(dates[i]);
@@ -189,17 +185,12 @@ window.SaunaData = {
       const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
       if (diffDays === 1) {
-        // Consecutive day
         streak++;
         skipped = 0;
       } else if (diffDays <= 3) {
-        // Gap of 1-2 days (diffDays = 2 or 3): allowed, add gap days + 1 to streak
-        // Actually diffDays=2 means 1 day gap, diffDays=3 means 2 day gap
-        // We just count the next date as part of the streak
         streak++;
         skipped += diffDays - 1;
       } else {
-        // Gap too large — streak broken
         break;
       }
     }

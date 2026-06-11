@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sauna Tracker - Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -13,34 +13,15 @@
     <h1 class="page-title">Dashboard</h1>
 
     <!-- Stats Cards -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value" id="statStreak">0</div>
-        <div class="stat-label">Day Streak</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statTotalSessions">0</div>
-        <div class="stat-label">Total Sessions</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statTotalHours">0</div>
-        <div class="stat-label">Total Hours</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statAvgSession">—</div>
-        <div class="stat-label">Avg Session</div>
-      </div>
-      <div class="stat-card full">
-        <div class="stat-value" id="statLongestSession">—</div>
-        <div class="stat-label">Longest Session</div>
-      </div>
+    <div class="stats-grid" id="statsGrid">
+      <!-- Populated by dashboard.js -->
     </div>
 
     <!-- Weekly Chart -->
     <div class="chart-section">
       <div class="chart-title">Last 7 Days (minutes)</div>
       <div class="chart-container">
-        <canvas id="weekChart"></canvas>
+        <canvas id="weeklyChart"></canvas>
       </div>
     </div>
 
@@ -48,7 +29,41 @@
     <div class="chart-section">
       <div class="chart-title">Monthly Trend (total minutes)</div>
       <div class="chart-container">
-        <canvas id="monthChart"></canvas>
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Biometrics Data -->
+    <div class="chart-section">
+      <h2 class="section-heading">Biometrics Data</h2>
+
+      <div class="chart-section">
+        <div class="chart-title">Weight Trend</div>
+        <div class="chart-container chart-container--tall">
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <div class="chart-title">Body Fat % Trend</div>
+        <div class="chart-container chart-container--tall">
+          <canvas id="bodyFatChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <div class="chart-title">Skeletal Muscle Mass Trend</div>
+        <div class="chart-container chart-container--tall">
+          <canvas id="muscleChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Biometrics Stats Card -->
+      <div class="bio-stats-card" id="bioStatsCard">
+        <div class="bio-stats-title">Sauna &amp; Biometrics Correlation</div>
+        <div id="bioStatsContent">
+          Loading biometrics data…
+        </div>
       </div>
     </div>
   </div>
@@ -70,8 +85,6 @@
   </nav>
 
   <script src="js/data.js"></script>
-  <script src="js/timer.js"></script>
-  <script src="js/log.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
 </html>

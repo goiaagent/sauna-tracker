@@ -3,76 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sauna Tracker - Timer</title>
+  <title>Sauna Tracker - Log</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <div class="container">
     <!-- Page Header -->
-    <h1 class="page-title">Sauna Timer</h1>
+    <h1 class="page-title">Log Session</h1>
 
-    <!-- Timer Display -->
-    <div class="timer-display">
-      <div class="timer-time" id="timerDisplay">00:00</div>
-      <div class="timer-status" id="timerStatus">Ready</div>
-    </div>
+    <!-- Session Log Form -->
+    <div class="card">
+      <form id="sessionForm" autocomplete="off">
+        <!-- Date -->
+        <div class="form-group">
+          <label class="form-label" for="sessionDate">Date</label>
+          <input type="date" class="form-input" id="sessionDate" required>
+        </div>
 
-    <!-- Timer Controls -->
-    <div class="timer-controls">
-      <button class="btn-timer btn-start" id="btnStart" title="Start timer (Space)">▶</button>
-      <button class="btn-timer btn-stop" id="btnStop" title="Stop timer (Space)">■</button>
-      <button class="btn-timer btn-reset" id="btnReset" title="Reset timer">↺</button>
+        <!-- Time -->
+        <div class="form-group">
+          <label class="form-label" for="sessionTime">Time</label>
+          <input type="time" class="form-input" id="sessionTime" required>
+        </div>
+
+        <!-- Number of Rounds -->
+        <div class="form-group">
+          <label class="form-label" for="sessionRounds">Number of Rounds</label>
+          <input type="number" class="form-input" id="sessionRounds" min="1" value="1" required>
+        </div>
+
+        <!-- Total Duration -->
+        <div class="form-group">
+          <label class="form-label" for="sessionDuration">Total Duration (minutes)</label>
+          <input type="number" class="form-input" id="sessionDuration" min="1" placeholder="e.g. 45" required>
+        </div>
+
+        <!-- Temperature -->
+        <div class="form-group">
+          <label class="form-label" for="sessionTemp">Temperature</label>
+          <select class="form-input" id="sessionTemp" required>
+            <option value="" disabled selected>Select temperature...</option>
+            <option value="60-70°C">60–70°C</option>
+            <option value="70-80°C">70–80°C</option>
+            <option value="80-90°C">80–90°C</option>
+            <option value="90-100°C">90–100°C</option>
+            <option value="Steam">Steam</option>
+          </select>
+        </div>
+
+        <!-- Contrast Checkbox -->
+        <div class="form-group">
+          <div class="form-checkbox-group">
+            <input type="checkbox" class="form-checkbox" id="sessionContrast">
+            <label class="form-checkbox-label" for="sessionContrast">Did cold plunge / contrast?</label>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label class="form-label" for="sessionNotes">Notes</label>
+          <textarea class="form-input" id="sessionNotes" placeholder="How did it feel? Any observations..." rows="3" style="resize: vertical; min-height: 70px;"></textarea>
+        </div>
+
+        <!-- Save Button -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btnSave">บันทึก</button>
+        </div>
+      </form>
     </div>
 
     <!-- Today's Sessions -->
-    <div class="today-session">
+    <div class="sessions-section">
       <div class="section-title">Today's Sessions</div>
       <div id="todaySessions">
-        <div class="session-empty">No sessions logged today yet</div>
+        <!-- Populated by JavaScript -->
       </div>
     </div>
   </div>
 
-  <!-- Session Log Modal -->
-  <div class="modal-overlay" id="sessionModal">
-    <div class="modal">
-      <div class="modal-title">Log Session</div>
-      <div class="modal-subtitle" id="modalSubtitle">Session: 00:00</div>
-
-      <div class="form-group">
-        <label class="form-label" for="tempSelect">Temperature</label>
-        <select class="form-select" id="tempSelect" required>
-          <option value="" disabled selected>Select temperature...</option>
-          <option value="60-70°C">60–70°C</option>
-          <option value="70-80°C">70–80°C</option>
-          <option value="80-90°C">80–90°C</option>
-          <option value="90-100°C">90–100°C</option>
-          <option value="steam">Steam</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="notesTextarea">Notes (optional)</label>
-        <textarea class="form-textarea" id="notesTextarea" placeholder="How was it? Any thoughts..." rows="3"></textarea>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn btn-secondary" id="btnCancel">Cancel</button>
-        <button class="btn btn-primary" id="btnSave">Save</button>
-      </div>
-    </div>
-  </div>
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">Saved!</div>
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <a href="index.html" class="nav-item active">
-      <span class="nav-icon">⏱</span>
-      <span>Timer</span>
-    </a>
-    <a href="log.html" class="nav-item">
       <span class="nav-icon">📋</span>
       <span>Log</span>
+    </a>
+    <a href="log.html" class="nav-item">
+      <span class="nav-icon">📅</span>
+      <span>History</span>
     </a>
     <a href="dashboard.html" class="nav-item">
       <span class="nav-icon">📊</span>
@@ -81,8 +102,122 @@
   </nav>
 
   <script src="js/data.js"></script>
-  <script src="js/timer.js"></script>
-  <script src="js/log.js"></script>
-  <script src="js/dashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // ---- Set default date (today) and time (now) ----
+      const now = new Date();
+      const dateInput = document.getElementById('sessionDate');
+      const timeInput = document.getElementById('sessionTime');
+
+      // Format date as YYYY-MM-DD
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      dateInput.value = yyyy + '-' + mm + '-' + dd;
+
+      // Format time as HH:MM
+      const hh = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      timeInput.value = hh + ':' + min;
+
+      // ---- Load today's sessions ----
+      function loadTodaySessions() {
+        const container = document.getElementById('todaySessions');
+        const sessions = window.SaunaData.getTodaySessions();
+
+        if (sessions.length === 0) {
+          container.innerHTML = '<div class="empty-state">No sessions logged today</div>';
+          return;
+        }
+
+        // Sort by time descending (newest first)
+        sessions.sort(function (a, b) {
+          return (b.time || '').localeCompare(a.time || '');
+        });
+
+        var html = '';
+        sessions.forEach(function (s) {
+          var contrastTag = '';
+          if (s.contrast) {
+            contrastTag = '<span class="contrast-badge">🧊 Cold Plunge</span>';
+          }
+
+          var notesHtml = '';
+          if (s.notes && s.notes.trim()) {
+            notesHtml = '<div class="session-notes-preview">"' + s.notes.trim() + '"</div>';
+          }
+
+          html += '<div class="session-card">' +
+            '<div class="session-card-header">' +
+            '<span class="session-time">' + (s.time || '—') + '</span>' +
+            '<span class="badge badge-temp">' + (s.temperature || '—') + '</span>' +
+            '</div>' +
+            '<div class="session-detail">' +
+            '<span>🔄 ' + (s.rounds || 1) + ' rounds</span>' +
+            '<span>⏱ ' + (s.total_minutes || 0) + ' min</span>' +
+            contrastTag +
+            '</div>' +
+            notesHtml +
+            '</div>';
+        });
+
+        container.innerHTML = html;
+      }
+
+      // ---- Toast helper ----
+      function showToast() {
+        var toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(function () {
+          toast.classList.remove('show');
+        }, 2000);
+      }
+
+      // ---- Handle form submission ----
+      document.getElementById('sessionForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var date = dateInput.value;
+        var time = timeInput.value;
+        var rounds = parseInt(document.getElementById('sessionRounds').value, 10) || 1;
+        var totalMinutes = parseInt(document.getElementById('sessionDuration').value, 10) || 0;
+        var temperature = document.getElementById('sessionTemp').value;
+        var contrast = document.getElementById('sessionContrast').checked;
+        var notes = document.getElementById('sessionNotes').value;
+
+        // Simple validation
+        if (!date || !time || !temperature) {
+          return;
+        }
+
+        // Save via SaunaData
+        window.SaunaData.addSession({
+          date: date,
+          time: time,
+          rounds: rounds,
+          total_minutes: totalMinutes,
+          temperature: temperature,
+          contrast: contrast,
+          notes: notes
+        });
+
+        showToast();
+
+        // Clear form (keep date and time)
+        document.getElementById('sessionRounds').value = 1;
+        document.getElementById('sessionDuration').value = '';
+        document.getElementById('sessionTemp').value = '';
+        document.getElementById('sessionContrast').checked = false;
+        document.getElementById('sessionNotes').value = '';
+
+        // Refresh today's sessions list
+        loadTodaySessions();
+      });
+
+      // ---- Initial load ----
+      loadTodaySessions();
+    });
+  </script>
+
 </body>
 </html>
